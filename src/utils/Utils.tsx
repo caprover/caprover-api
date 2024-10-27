@@ -1,4 +1,3 @@
-
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
     copyObject<T>(obj: T): T {
@@ -123,7 +122,6 @@ export default {
                       .replace(/[0-9a-f]{2}/g, '%$&')
               )
     },
-
 
     mergeObjects(object1: any, object2: any) {
         const newObject = object1 || {}
