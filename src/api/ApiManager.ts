@@ -51,10 +51,6 @@ export default class ApiManager {
         this.http.destroy()
     }
 
-    static getAuthTokenString() {
-        return ApiManager.authToken
-    }
-
     setAuthToken(authToken: string) {
         ApiManager.authToken = authToken
         this.http.setAuthToken(authToken)
