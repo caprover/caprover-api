@@ -10,7 +10,6 @@ import { IRegistryInfo } from '../models/IRegistryInfo'
 import { IVersionInfo } from '../models/IVersionInfo'
 import ProjectDefinition from '../models/ProjectDefinition'
 import CapRoverTheme from '../models/CapRoverTheme'
-import ErrorFactory from '../utils/ErrorFactory'
 import HttpClient from './HttpClient'
 
 export type AuthenticationContent = {
@@ -21,8 +20,6 @@ export type AuthenticationContent = {
 export type AuthRequiredCallback = () => Promise<AuthenticationContent>
 
 export default class ApiManager {
-    private authToken = ''
-
     private http: HttpClient
 
     constructor(
@@ -34,29 +31,18 @@ export default class ApiManager {
         self.http = new HttpClient(URL, function () {
             return self.getAuthToken()
         })
-        self.http.setAuthToken(self.authToken)
     }
 
     destroy() {
         this.http.destroy()
     }
 
-    setAuthToken(authToken: string) {
-        this.authToken = authToken
-        this.http.setAuthToken(authToken)
-    }
-
-    isLoggedIn(): boolean {
-        return !!this.authToken
-    }
-
-    getAuthToken() {
+    getAuthToken(): Promise<string> {
         const self = this
         const http = self.http
 
         return Promise.resolve() //
             .then(() => {
-                //
                 return self.authCallback()
             })
             .then((authContent) => {
@@ -69,24 +55,7 @@ export default class ApiManager {
                     )
             })
             .then(function (data) {
-                self.setAuthToken(data.token)
-                return data
-            })
-            .catch(function (error) {
-                // Upon wrong password or back-off error, we force logout the user
-                // to avoid getting stuck with wrong password loop
-                if (
-                    error.captainStatus + '' ===
-                        ErrorFactory.STATUS_PASSWORD_BACK_OFF + '' ||
-                    error.captainStatus + '' ===
-                        ErrorFactory.STATUS_WRONG_PASSWORD + ''
-                ) {
-                    self.setAuthToken('')
-                    this.lastKnownPassword = ''
-                    this.hadOtp = false
-                }
-
-                return Promise.reject(error)
+                return data.token
             })
     }
 
@@ -114,6 +83,7 @@ export default class ApiManager {
                 })
             )
     }
+
     saveTheme(oldName: string, theme: CapRoverTheme): any {
         const http = this.http
 

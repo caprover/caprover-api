@@ -14,7 +14,7 @@ export default class HttpClient {
 
     constructor(
         private baseUrl: string,
-        private onAuthFailure: () => Promise<any>
+        private onAuthFailure: () => Promise<string>
     ) {
         //
     }
@@ -58,12 +58,28 @@ export default class HttpClient {
                     ) {
                         return self
                             .onAuthFailure() //
-                            .then(function () {
+                            .then(function (authToken) {
+                                self.setAuthToken(authToken)
                                 return self
                                     .fetchInternal(method, endpoint, variables)
                                     .then(function (newAxiosResponse) {
                                         return newAxiosResponse.data
                                     })
+                            })
+                            .catch(function (error) {
+                                // Upon wrong password or back-off error, we force logout the user
+                                // to avoid getting stuck with wrong password loop
+                                if (
+                                    error.captainStatus + '' ===
+                                        ErrorFactory.STATUS_PASSWORD_BACK_OFF +
+                                            '' ||
+                                    error.captainStatus + '' ===
+                                        ErrorFactory.STATUS_WRONG_PASSWORD + ''
+                                ) {
+                                    self.setAuthToken('')
+                                }
+
+                                return Promise.reject(error)
                             })
                     } else {
                         return data
