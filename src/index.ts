@@ -9,4 +9,11 @@ new ApiManager('http://localhost:3000')
         console.log(error)
     })
 
+// TODO:
+// Change the signature to:
+// new ApiManager('http://localhost:3000', () => {
+//     // get password and otp from user
+//     return Promise.resolve(ApiManager.createAuth(password, otp))
+// })
+
 console.log('Hello World!')

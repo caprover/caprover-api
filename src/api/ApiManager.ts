@@ -14,19 +14,19 @@ import ErrorFactory from '../utils/ErrorFactory'
 import HttpClient from './HttpClient'
 
 export default class ApiManager {
-    private static lastKnownPassword: string = ''
-    private static hadOtp: boolean = false
-    private static authToken = ''
+    private lastKnownPassword: string = ''
+    private hadOtp: boolean = false
+    private authToken = ''
 
     private http: HttpClient
 
     constructor(baseDomain: string) {
         const self = this
         const URL = baseDomain + '/api/v2'
-        this.http = new HttpClient(URL, function () {
-            if (!ApiManager.lastKnownPassword || ApiManager.hadOtp) {
+        self.http = new HttpClient(URL, function () {
+            if (!self.getLastKnownPassword() || self.getHadOtp()) {
                 // If we had OTP, we don't want to try to login again because we know it's gonna fail!
-                if (!!ApiManager.authToken) {
+                if (!!self.authToken) {
                     // force logging out
                     self.setAuthToken('')
                     setTimeout(() => {
@@ -38,9 +38,17 @@ export default class ApiManager {
                     new Error('No saved password. Ignore if initial call.')
                 )
             }
-            return self.getAuthToken(ApiManager.lastKnownPassword)
+            return self.getAuthToken(self.lastKnownPassword)
         })
-        this.http.setAuthToken(ApiManager.authToken)
+        self.http.setAuthToken(self.authToken)
+    }
+
+    getLastKnownPassword() {
+        return this.lastKnownPassword
+    }
+
+    getHadOtp() {
+        return this.hadOtp
     }
 
     getApiBaseUrl() {
@@ -52,18 +60,18 @@ export default class ApiManager {
     }
 
     setAuthToken(authToken: string) {
-        ApiManager.authToken = authToken
+        this.authToken = authToken
         this.http.setAuthToken(authToken)
     }
 
-    static isLoggedIn(): boolean {
-        return !!ApiManager.authToken
+    isLoggedIn(): boolean {
+        return !!this.authToken
     }
 
     getAuthToken(password: string, otpToken?: string) {
         const http = this.http
-        ApiManager.lastKnownPassword = password
-        ApiManager.hadOtp = !!otpToken
+        this.lastKnownPassword = password
+        this.hadOtp = !!otpToken
 
         const self = this
         return Promise.resolve() //
@@ -82,8 +90,8 @@ export default class ApiManager {
                         ErrorFactory.STATUS_WRONG_PASSWORD + ''
                 ) {
                     self.setAuthToken('')
-                    ApiManager.lastKnownPassword = ''
-                    ApiManager.hadOtp = false
+                    this.lastKnownPassword = ''
+                    this.hadOtp = false
                 }
 
                 return Promise.reject(error)
