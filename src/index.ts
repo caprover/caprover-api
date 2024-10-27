@@ -8,8 +8,10 @@ const apiManager = new ApiManager('http://localhost:3000', () => {
     })
 })
 
-apiManager
-    .getCaptainInfo()
+Promise.resolve()
+    .then(() => {
+        return apiManager.getCaptainInfo()
+    })
     .then((response: any) => {
         console.log(response)
         return apiManager.getDockerRegistries()
