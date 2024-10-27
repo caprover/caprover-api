@@ -13,46 +13,28 @@ import CapRoverTheme from '../models/CapRoverTheme'
 import ErrorFactory from '../utils/ErrorFactory'
 import HttpClient from './HttpClient'
 
+export type AuthenticationContent = {
+    password: string
+    otpToken?: string
+}
+
+export type AuthRequiredCallback = () => Promise<AuthenticationContent>
+
 export default class ApiManager {
-    private lastKnownPassword: string = ''
-    private hadOtp: boolean = false
     private authToken = ''
 
     private http: HttpClient
 
-    constructor(baseDomain: string) {
+    constructor(
+        baseDomain: string,
+        private authCallback: AuthRequiredCallback
+    ) {
         const self = this
         const URL = baseDomain + '/api/v2'
         self.http = new HttpClient(URL, function () {
-            if (!self.getLastKnownPassword() || self.getHadOtp()) {
-                // If we had OTP, we don't want to try to login again because we know it's gonna fail!
-                if (!!self.authToken) {
-                    // force logging out
-                    self.setAuthToken('')
-                    setTimeout(() => {
-                        window.location.href =
-                            window.location.href.split('#')[0]
-                    }, 200)
-                }
-                return Promise.reject(
-                    new Error('No saved password. Ignore if initial call.')
-                )
-            }
-            return self.getAuthToken(self.lastKnownPassword)
+            return self.getAuthToken()
         })
         self.http.setAuthToken(self.authToken)
-    }
-
-    getLastKnownPassword() {
-        return this.lastKnownPassword
-    }
-
-    getHadOtp() {
-        return this.hadOtp
-    }
-
-    getApiBaseUrl() {
-        return URL
     }
 
     destroy() {
@@ -68,14 +50,24 @@ export default class ApiManager {
         return !!this.authToken
     }
 
-    getAuthToken(password: string, otpToken?: string) {
-        const http = this.http
-        this.lastKnownPassword = password
-        this.hadOtp = !!otpToken
-
+    getAuthToken() {
         const self = this
+        const http = self.http
+
         return Promise.resolve() //
-            .then(http.fetch(http.POST, '/login', { password, otpToken }))
+            .then(() => {
+                //
+                return self.authCallback()
+            })
+            .then((authContent) => {
+                return Promise.resolve() //
+                    .then(
+                        http.fetch(http.POST, '/login', {
+                            password: authContent?.password,
+                            otpToken: authContent?.otpToken,
+                        })
+                    )
+            })
             .then(function (data) {
                 self.setAuthToken(data.token)
                 return data

@@ -1,7 +1,19 @@
 import ApiManager from './api/ApiManager'
 
-new ApiManager('http://localhost:3000')
-    .getAuthToken('captain42')
+const apiManager = new ApiManager('http://localhost:3000', () => {
+    // get password and otp from user
+    return Promise.resolve({
+        password: 'captain42',
+        otpToken: undefined,
+    })
+})
+
+apiManager
+    .getCaptainInfo()
+    .then((response: any) => {
+        console.log(response)
+        return apiManager.getDockerRegistries()
+    })
     .then((response: any) => {
         console.log(response)
     })
@@ -9,11 +21,8 @@ new ApiManager('http://localhost:3000')
         console.log(error)
     })
 
-// TODO:
-// Change the signature to:
-// new ApiManager('http://localhost:3000', () => {
-//     // get password and otp from user
-//     return Promise.resolve(ApiManager.createAuth(password, otp))
-// })
+// Think about what if one future requests fails and we need to reuse the same password and otp
+// For example, if the server restarts, we need to re-authenticate the user using the same password
+// and otp. So we need to store them somewhere. Maybe in the ApiManager instance itself?
 
-console.log('Hello World!')
+console.log('===============================================')
