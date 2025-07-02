@@ -41,9 +41,17 @@ export default class HttpClient {
         return function (): Promise<any> {
             return Promise.resolve() //
                 .then(function () {
+                    console.log(
+                        `Fetching ${method} ${endpoint} with variables:`,
+                        variables
+                    )
                     return self.fetchInternal(method, endpoint, variables) //
                 })
                 .then(function (axiosResponse) {
+                    console.log(
+                        `Axios response for ${method} ${endpoint}:`,
+                        axiosResponse
+                    )
                     const data = axiosResponse.data // this is an axios thing!
 
                     if (
