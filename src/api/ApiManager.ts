@@ -10,7 +10,8 @@ import {
 } from '../models/IProFeatures'
 import { IRegistryInfo } from '../models/IRegistryInfo'
 import { IVersionInfo } from '../models/IVersionInfo'
-import ProjectDefinition from '../models/ProjectDefinition'
+import { ProjectDefinition } from '../models/ProjectDefinition'
+import { ServerDockerInfo } from '../models/ServerDockerInfo'
 import HttpClient from './HttpClient'
 
 export type AuthenticationContent = {
@@ -714,7 +715,7 @@ export default class ApiManager {
             .then(http.fetch(http.POST, webhookPath, {}))
     }
 
-    getAllNodes() {
+    getAllNodes(): Promise<{ nodes: ServerDockerInfo[] }> {
         const http = this.http
 
         return Promise.resolve() //
