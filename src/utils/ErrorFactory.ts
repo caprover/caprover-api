@@ -1,5 +1,3 @@
-import CrashReporter from './CrashReporter'
-
 class ErrorFactory {
     public readonly OKAY = 100
     public readonly OKAY_BUILD_STARTED = 101
@@ -29,13 +27,6 @@ class ErrorFactory {
         e.captainStatus = status
         e.captainMessage = message
         return e
-    }
-
-    eatUpPromiseRejection() {
-        return function (error: any) {
-            CrashReporter.getInstance().captureException(error)
-            // nom nom
-        }
     }
 }
 

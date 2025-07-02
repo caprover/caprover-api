@@ -1,5 +1,7 @@
-import { IAppDef } from './../models/AppDefinition'
+import { IAppDef } from '../models/AppDefinition'
+import CapRoverTheme from '../models/CapRoverTheme'
 import { ICaptainDefinition } from '../models/ICaptainDefinition'
+import IGoAccessInfo from '../models/IGoAccessInfo'
 import {
     IProConfig,
     IProFeatures,
@@ -9,7 +11,6 @@ import {
 import { IRegistryInfo } from '../models/IRegistryInfo'
 import { IVersionInfo } from '../models/IVersionInfo'
 import ProjectDefinition from '../models/ProjectDefinition'
-import CapRoverTheme from '../models/CapRoverTheme'
 import HttpClient from './HttpClient'
 
 export type AuthenticationContent = {
@@ -484,6 +485,40 @@ export default class ApiManager {
             .then(
                 http.fetch(http.POST, '/user/system/netdata', { netDataInfo })
             )
+    }
+
+    getGoAccessInfo(): Promise<IGoAccessInfo> {
+        const http = this.http
+
+        return Promise.resolve() //
+            .then(http.fetch(http.GET, '/user/system/goaccess', {}))
+    }
+
+    updateGoAccessInfo(goAccessInfo: any) {
+        const http = this.http
+
+        return Promise.resolve() //
+            .then(
+                http.fetch(http.POST, '/user/system/goaccess', { goAccessInfo })
+            )
+    }
+    getGoAccessReports(appName: string) {
+        const http = this.http
+
+        return Promise.resolve() //
+            .then(
+                http.fetch(
+                    http.GET,
+                    `/user/system/goaccess/${appName}/files`,
+                    {}
+                )
+            )
+    }
+    getGoAccessReport(reportUrl: string) {
+        const http = this.http
+
+        return Promise.resolve() //
+            .then(http.fetch(http.GET, reportUrl, {}))
     }
 
     changePass(oldPassword: string, newPassword: string) {

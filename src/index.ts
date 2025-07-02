@@ -8,6 +8,8 @@ const apiManager = new ApiManager('http://localhost:3000', () => {
     })
 })
 
+console.log('===============================================')
+
 Promise.resolve()
     .then(() => {
         return apiManager.getCaptainInfo()
