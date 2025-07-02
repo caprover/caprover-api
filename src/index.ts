@@ -12,7 +12,7 @@ console.log('===============================================')
 
 Promise.resolve()
     .then(() => {
-        return apiManager.setCurrentTheme('')
+        return apiManager.getAllNodes()
     })
     .then((response: any) => {
         console.log(response)
