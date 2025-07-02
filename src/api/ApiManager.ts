@@ -74,7 +74,7 @@ export default class ApiManager {
             .then(http.fetch(http.GET, '/theme/current', {}))
     }
 
-    setCurrentTheme(themeName: string): any {
+    setCurrentTheme(themeName: string): Promise<{}> {
         const http = this.http
 
         return Promise.resolve() //
@@ -85,7 +85,7 @@ export default class ApiManager {
             )
     }
 
-    saveTheme(oldName: string, theme: CapRoverTheme): any {
+    saveTheme(oldName: string, theme: CapRoverTheme): Promise<{}> {
         const http = this.http
 
         return Promise.resolve() //
@@ -98,7 +98,7 @@ export default class ApiManager {
             )
     }
 
-    deleteTheme(themeName: string): any {
+    deleteTheme(themeName: string): Promise<{}> {
         const http = this.http
 
         return Promise.resolve() //
