@@ -1,6 +1,6 @@
 import ApiManager from './api/ApiManager'
 
-const apiManager = new ApiManager('http://localhost:3000', () => {
+const apiManager = new ApiManager('http://127.0.0.1:3000', () => {
     // get password and otp from user
     return Promise.resolve({
         password: 'captain42',
