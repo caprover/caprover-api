@@ -1,4 +1,4 @@
-import { IHashMapGeneric } from './ICacheGeneric'
+import { IHashMapGeneric } from './IHashMapGeneric'
 
 export type IAllAppDefinitions = IHashMapGeneric<IAppDef>
 
