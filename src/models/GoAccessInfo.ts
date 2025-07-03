@@ -1,6 +1,6 @@
-export class GoAccessInfo {
-    public isEnabled: boolean
-    public data: {
+export interface GoAccessInfo {
+    isEnabled: boolean
+    data: {
         rotationFrequencyCron: string
         logRetentionDays: number
     }

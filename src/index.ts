@@ -14,14 +14,14 @@ Promise.resolve()
     .then(() => {
         return apiManager.getAllNodes()
     })
-    .then((response: any) => {
+    .then((response) => {
         console.log(response)
         return apiManager.getDockerRegistries()
     })
-    .then((response: any) => {
+    .then((response) => {
         console.log(response)
     })
-    .catch((error: any) => {
+    .catch((error) => {
         console.log(error)
     })
 

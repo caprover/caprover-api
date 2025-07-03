@@ -1,11 +1,11 @@
-export default class LoadBalancerInfo {
-    public activeConnections: number
+export default interface LoadBalancerInfo {
+    activeConnections: number
 
-    public accepted: number
-    public handled: number
-    public total: number
+    accepted: number
+    handled: number
+    total: number
 
-    public reading: number
-    public writing: number
-    public waiting: number
+    reading: number
+    writing: number
+    waiting: number
 }

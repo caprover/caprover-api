@@ -1,7 +1,7 @@
-export class NetDataInfo {
-    public isEnabled: boolean
-    public netDataUrl: string
-    public data: {
+export interface NetDataInfo {
+    isEnabled: boolean
+    netDataUrl: string
+    data: {
         smtp: {
             to: string
             hostname: string
