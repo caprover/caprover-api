@@ -9,9 +9,9 @@
         "tslint": "tslint -c tslint.json -p tsconfig.json",
         "tslint-fix": "tslint --fix -c tslint.json -p tsconfig.json",
         "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "npm run tslint && rm -rf ./built && npx tsc && chmod +x ./built -R",
+        "build": "rm -rf ./built && npm run tslint && npx tsc && chmod +x ./built -R",
         "start": "node ./built/index.js",
-        "dev": "npx tsc && npm start",
+        "dev": "rm -rf ./built && npx tsc && npm start",
         "generate-barrels": "barrelsby --directory src/models"
     },
     "author": "",

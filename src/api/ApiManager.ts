@@ -47,7 +47,7 @@ export default class ApiManager {
     ) {
         const self = this
         const URL = baseDomain + '/api/v2'
-        self.http = new HttpClient(URL, function () {
+        this.http = new HttpClient(URL, function () {
             return self.getAuthToken()
         })
     }
