@@ -1,6 +1,5 @@
 import axios from 'axios'
-import ErrorFactory from '../utils/ErrorFactory'
-import Logger from '../utils/Logger'
+import ErrorFactory from './ErrorFactory'
 
 let TOKEN_HEADER = 'x-captain-auth'
 let NAMESPACE = 'x-namespace'
@@ -99,14 +98,11 @@ export default class HttpClient {
                     return new Promise(function (resolve, reject) {
                         // data.data here is the "data" field inside the API response! {status: 100, description: "Login succeeded", data: {…}}
                         if (!self.isDestroyed) return resolve(data.data)
-                        Logger.dev('Destroyed then not called')
                     })
                 })
                 .catch(function (error) {
-                    Logger.error(error)
                     return new Promise(function (resolve, reject) {
                         if (!self.isDestroyed) return reject(error)
-                        Logger.dev('Destroyed catch not called')
                     })
                 })
         }
