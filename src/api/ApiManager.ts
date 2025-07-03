@@ -1,5 +1,12 @@
 import { IAppDef } from '../models/AppDefinition'
+import AppDefinitionsResponse from '../models/AppDefinitionsResponse'
+import AppDeleteResponse from '../models/AppDeleteResponse'
+import { IAutomatedCleanupConfigs } from '../models/AutomatedCleanupConfigs'
+import { BuildLogsResponse } from '../models/BuildLogsResponse'
 import CapRoverTheme from '../models/CapRoverTheme'
+import CaptainInfo from '../models/CaptainInfo'
+import { GoAccessInfo } from '../models/GoAccessInfo'
+import GoAccessReportResponse from '../models/GoAccessReportResponse'
 import { ICaptainDefinition } from '../models/ICaptainDefinition'
 import IGoAccessInfo from '../models/IGoAccessInfo'
 import {
@@ -10,8 +17,18 @@ import {
 } from '../models/IProFeatures'
 import { IRegistryInfo } from '../models/IRegistryInfo'
 import { IVersionInfo } from '../models/IVersionInfo'
+import LoadBalancerInfo from '../models/LoadBalancerInfo'
+import LogsResponse from '../models/LogsResponse'
+import { NetDataInfo } from '../models/NetDataInfo'
+import NginxConfig from '../models/NginxConfig'
+import OneClickAppDefinitionResponse from '../models/OneClickAppDefinitionResponse'
+import OneClickAppRepositories from '../models/OneClickAppRepositories'
+import OneClickAppResponse from '../models/OneClickAppResponse'
 import { ProjectDefinition } from '../models/ProjectDefinition'
+import ProjectsResponse from '../models/ProjectsResponse'
+import RegistriesResponse from '../models/RegistriesResponse'
 import { ServerDockerInfo } from '../models/ServerDockerInfo'
+import UnusedImagesResponse from '../models/UnusedImagesResponse'
 import HttpClient from './HttpClient'
 
 export type AuthenticationContent = {
@@ -154,14 +171,14 @@ export default class ApiManager {
             .then(http.fetch(http.POST, '/user/pro/otp', data))
     }
 
-    getCaptainInfo() {
+    getCaptainInfo(): Promise<CaptainInfo> {
         const http = this.http
 
         return Promise.resolve() //
             .then(http.fetch(http.GET, '/user/system/info', {}))
     }
 
-    updateRootDomain(rootDomain: string, force: boolean) {
+    updateRootDomain(rootDomain: string, force: boolean): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -173,7 +190,7 @@ export default class ApiManager {
             )
     }
 
-    enableRootSsl(emailAddress: string) {
+    enableRootSsl(emailAddress: string): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -184,35 +201,35 @@ export default class ApiManager {
             )
     }
 
-    forceSsl(isEnabled: boolean) {
+    forceSsl(isEnabled: boolean): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
             .then(http.fetch(http.POST, '/user/system/forcessl', { isEnabled }))
     }
 
-    getAllApps() {
+    getAllApps(): Promise<AppDefinitionsResponse> {
         const http = this.http
 
         return Promise.resolve() //
             .then(http.fetch(http.GET, '/user/apps/appDefinitions', {}))
     }
 
-    getAllProjects() {
+    getAllProjects(): Promise<ProjectsResponse> {
         const http = this.http
 
         return Promise.resolve() //
             .then(http.fetch(http.GET, '/user/projects', {}))
     }
 
-    fetchBuildLogs(appName: string) {
+    fetchBuildLogs(appName: string): Promise<BuildLogsResponse> {
         const http = this.http
 
         return Promise.resolve() //
             .then(http.fetch(http.GET, `/user/apps/appData/${appName}`, {}))
     }
 
-    fetchAppLogsInHex(appName: string) {
+    fetchAppLogsInHex(appName: string): Promise<LogsResponse> {
         const http = this.http
 
         return Promise.resolve() //
@@ -225,7 +242,7 @@ export default class ApiManager {
             )
     }
 
-    uploadAppData(appName: string, file: File) {
+    uploadAppData(appName: string, file: File): Promise<void> {
         const http = this.http
         let formData = new FormData()
         formData.append('sourceFile', file)
@@ -251,7 +268,7 @@ export default class ApiManager {
             )
     }
 
-    updateProject(project: ProjectDefinition) {
+    updateProject(project: ProjectDefinition): Promise<void> {
         const http = this.http
         return Promise.resolve() //
             .then(
@@ -266,7 +283,7 @@ export default class ApiManager {
         captainDefinition: ICaptainDefinition,
         gitHash: string,
         detached: boolean
-    ) {
+    ): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -285,7 +302,10 @@ export default class ApiManager {
             )
     }
 
-    updateConfigAndSave(appName: string, appDefinition: IAppDef) {
+    updateConfigAndSave(
+        appName: string,
+        appDefinition: IAppDef
+    ): Promise<void> {
         let instanceCount = appDefinition.instanceCount
         let captainDefinitionRelativeFilePath =
             appDefinition.captainDefinitionRelativeFilePath
@@ -338,7 +358,7 @@ export default class ApiManager {
             )
     }
 
-    renameApp(oldAppName: string, newAppName: string) {
+    renameApp(oldAppName: string, newAppName: string): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -355,7 +375,7 @@ export default class ApiManager {
         projectId: string,
         hasPersistentData: boolean,
         detached: boolean
-    ) {
+    ): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -378,7 +398,7 @@ export default class ApiManager {
         appName: string | undefined,
         volumes: string[],
         appNames: string[] | undefined
-    ) {
+    ): Promise<AppDeleteResponse> {
         const http = this.http
 
         return Promise.resolve() //
@@ -391,7 +411,7 @@ export default class ApiManager {
             )
     }
 
-    deleteProjects(projectIds: string[]) {
+    deleteProjects(projectIds: string[]): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -402,7 +422,7 @@ export default class ApiManager {
             )
     }
 
-    enableSslForBaseDomain(appName: string) {
+    enableSslForBaseDomain(appName: string): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -417,7 +437,10 @@ export default class ApiManager {
             )
     }
 
-    attachNewCustomDomainToApp(appName: string, customDomain: string) {
+    attachNewCustomDomainToApp(
+        appName: string,
+        customDomain: string
+    ): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -433,7 +456,10 @@ export default class ApiManager {
             )
     }
 
-    enableSslForCustomDomain(appName: string, customDomain: string) {
+    enableSslForCustomDomain(
+        appName: string,
+        customDomain: string
+    ): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -449,7 +475,7 @@ export default class ApiManager {
             )
     }
 
-    removeCustomDomain(appName: string, customDomain: string) {
+    removeCustomDomain(appName: string, customDomain: string): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -465,21 +491,21 @@ export default class ApiManager {
             )
     }
 
-    getLoadBalancerInfo() {
+    getLoadBalancerInfo(): Promise<LoadBalancerInfo> {
         const http = this.http
 
         return Promise.resolve() //
             .then(http.fetch(http.GET, '/user/system/loadbalancerinfo', {}))
     }
 
-    getNetDataInfo() {
+    getNetDataInfo(): Promise<NetDataInfo> {
         const http = this.http
 
         return Promise.resolve() //
             .then(http.fetch(http.GET, '/user/system/netdata', {}))
     }
 
-    updateNetDataInfo(netDataInfo: any) {
+    updateNetDataInfo(netDataInfo: NetDataInfo): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -495,7 +521,7 @@ export default class ApiManager {
             .then(http.fetch(http.GET, '/user/system/goaccess', {}))
     }
 
-    updateGoAccessInfo(goAccessInfo: any) {
+    updateGoAccessInfo(goAccessInfo: GoAccessInfo): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -503,7 +529,7 @@ export default class ApiManager {
                 http.fetch(http.POST, '/user/system/goaccess', { goAccessInfo })
             )
     }
-    getGoAccessReports(appName: string) {
+    getGoAccessReports(appName: string): Promise<GoAccessReportResponse[]> {
         const http = this.http
 
         return Promise.resolve() //
@@ -515,14 +541,15 @@ export default class ApiManager {
                 )
             )
     }
-    getGoAccessReport(reportUrl: string) {
+
+    getGoAccessReport(reportUrl: string): Promise<string> {
         const http = this.http
 
         return Promise.resolve() //
             .then(http.fetch(http.GET, reportUrl, {}))
     }
 
-    changePass(oldPassword: string, newPassword: string) {
+    changePass(oldPassword: string, newPassword: string): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -552,7 +579,7 @@ export default class ApiManager {
             )
     }
 
-    performUpdate(latestVersion: string) {
+    performUpdate(latestVersion: string): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -563,14 +590,14 @@ export default class ApiManager {
             )
     }
 
-    getNginxConfig() {
+    getNginxConfig(): Promise<NginxConfig> {
         const http = this.http
 
         return Promise.resolve() //
             .then(http.fetch(http.GET, '/user/system/nginxconfig', {}))
     }
 
-    setNginxConfig(customBase: string, customCaptain: string) {
+    setNginxConfig(customBase: string, customCaptain: string): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -582,7 +609,7 @@ export default class ApiManager {
             )
     }
 
-    getUnusedImages(mostRecentLimit: number) {
+    getUnusedImages(mostRecentLimit: number): Promise<UnusedImagesResponse> {
         const http = this.http
         return Promise.resolve() //
             .then(
@@ -592,7 +619,7 @@ export default class ApiManager {
             )
     }
 
-    deleteImages(imageIds: string[]) {
+    deleteImages(imageIds: string[]): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -607,7 +634,7 @@ export default class ApiManager {
             )
     }
 
-    getDiskCleanUpSettings() {
+    getDiskCleanUpSettings(): Promise<IAutomatedCleanupConfigs> {
         const http = this.http
 
         return Promise.resolve() //
@@ -618,7 +645,7 @@ export default class ApiManager {
         mostRecentLimit: number,
         cronSchedule: string,
         timezone: string
-    ) {
+    ): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -631,14 +658,14 @@ export default class ApiManager {
             )
     }
 
-    getDockerRegistries() {
+    getDockerRegistries(): Promise<RegistriesResponse> {
         const http = this.http
 
         return Promise.resolve() //
             .then(http.fetch(http.GET, '/user/registries', {}))
     }
 
-    enableSelfHostedDockerRegistry() {
+    enableSelfHostedDockerRegistry(): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -651,7 +678,7 @@ export default class ApiManager {
             )
     }
 
-    disableSelfHostedDockerRegistry() {
+    disableSelfHostedDockerRegistry(): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -664,7 +691,7 @@ export default class ApiManager {
             )
     }
 
-    addDockerRegistry(dockerRegistry: IRegistryInfo) {
+    addDockerRegistry(dockerRegistry: IRegistryInfo): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -675,7 +702,7 @@ export default class ApiManager {
             )
     }
 
-    updateDockerRegistry(dockerRegistry: IRegistryInfo) {
+    updateDockerRegistry(dockerRegistry: IRegistryInfo): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -686,7 +713,7 @@ export default class ApiManager {
             )
     }
 
-    deleteDockerRegistry(registryId: string) {
+    deleteDockerRegistry(registryId: string): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -697,7 +724,7 @@ export default class ApiManager {
             )
     }
 
-    setDefaultPushDockerRegistry(registryId: string) {
+    setDefaultPushDockerRegistry(registryId: string): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -708,7 +735,7 @@ export default class ApiManager {
             )
     }
 
-    forceBuild(webhookPath: string) {
+    forceBuild(webhookPath: string): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -722,14 +749,17 @@ export default class ApiManager {
             .then(http.fetch(http.GET, '/user/system/nodes', {}))
     }
 
-    getAllOneClickApps() {
+    getAllOneClickApps(): Promise<OneClickAppResponse> {
         const http = this.http
 
         return Promise.resolve() //
             .then(http.fetch(http.GET, '/user/oneclick/template/list', {}))
     }
 
-    getOneClickAppByName(appName: string, baseDomain: string) {
+    getOneClickAppByName(
+        appName: string,
+        baseDomain: string
+    ): Promise<OneClickAppDefinitionResponse> {
         const http = this.http
 
         return Promise.resolve() //
@@ -741,14 +771,14 @@ export default class ApiManager {
             )
     }
 
-    getAllOneClickAppRepos() {
+    getAllOneClickAppRepos(): Promise<OneClickAppRepositories> {
         const http = this.http
 
         return Promise.resolve() //
             .then(http.fetch(http.GET, '/user/oneclick/repositories', {}))
     }
 
-    addNewCustomOneClickRepo(repositoryUrl: string) {
+    addNewCustomOneClickRepo(repositoryUrl: string): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -759,7 +789,7 @@ export default class ApiManager {
             )
     }
 
-    deleteCustomOneClickRepo(repositoryUrl: string) {
+    deleteCustomOneClickRepo(repositoryUrl: string): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //
@@ -777,7 +807,7 @@ export default class ApiManager {
         sshPort: string,
         sshUser: string,
         captainIpAddress: string
-    ) {
+    ): Promise<void> {
         const http = this.http
 
         return Promise.resolve() //

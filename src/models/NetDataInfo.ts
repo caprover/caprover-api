@@ -1,5 +1,6 @@
 export class NetDataInfo {
     public isEnabled: boolean
+    public netDataUrl: string
     public data: {
         smtp: {
             to: string
