@@ -2,15 +2,13 @@ https://github.com/caprover/caprover-api
 
 # Official CapRover API SDK (TypeScript)
 
-A simple, typed TypeScript SDK for the CapRover API.
+A simple, typed Typescript SDK for the CapRover API.
 
 ## Install
 
+```
 npm install caprover-api
-
-csharp
-Copy
-Edit
+```
 
 ## Usage
 
