@@ -15,15 +15,25 @@ Edit
 ```ts
 import CapRoverAPI, { CapRoverModels } from 'caprover-api'
 
-const api = new CapRoverAPI('password', 'https://captain.domain.com')
+const caprover = new CapRoverAPI(
+    'https://captain.server.demo.caprover.com',
+    () => {
+        // get password and otp from user
+        return Promise.resolve({
+            password: 'captain42',
+            otpToken: undefined, // only if 2FA is enabled
+        })
+    }
+)
 
-const info = await api.serverInfo()
-
-const app: CapRoverModels.AppDefinition = {
-    appName: 'test',
-    hasPersistentData: false,
-}
-await api.createApp(app)
+caprover
+    .getAllNodes()
+    .then((response) => {
+        console.log(response)
+    })
+    .catch((error) => {
+        console.log(error)
+    })
 ```
 
 ---
@@ -31,15 +41,4 @@ await api.createApp(app)
 ## **How to Run Locally**
 
 1. `npm install`
-2. `npm run build`
-3. `node dist/example.js` _(after putting your own password/URL!)_
-
----
-
-## **Summary**
-
-- **Browser + Node.js** support via `cross-fetch`.
-- **TypeScript types** are exported for models.
-- Super easy to expand with more API endpoints!
-
----
+2. `npm run dev` _(after putting your own password/URL!)_

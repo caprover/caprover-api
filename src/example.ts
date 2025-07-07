@@ -1,12 +1,15 @@
 import CapRoverAPI, { CapRoverModels } from './index'
 
-const caprover = new CapRoverAPI('http://127.0.0.1:3000', () => {
-    // get password and otp from user
-    return Promise.resolve({
-        password: 'captain42',
-        otpToken: undefined,
-    })
-})
+const caprover = new CapRoverAPI(
+    'https://captain.server.demo.caprover.com',
+    () => {
+        // get password and otp from user
+        return Promise.resolve({
+            password: 'captain42',
+            otpToken: undefined,
+        })
+    }
+)
 
 console.log('===============================================')
 
