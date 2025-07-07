@@ -15,10 +15,17 @@ Promise.resolve()
         return caprover.getAllNodes()
     })
     .then((response) => {
+        console.log(
+            '=============================================== getAllNodes:'
+        )
+
         console.log(response)
         return caprover.getDockerRegistries()
     })
     .then((response) => {
+        console.log(
+            '=============================================== getDockerRegistries:'
+        )
         console.log(response)
     })
     .catch((error) => {
@@ -28,5 +35,3 @@ Promise.resolve()
 // TODO: a good example of how to export with typescript type information
 // https://github.com/dgreif/ring/blob/main/packages/ring-client-api/package.json
 //
-
-console.log('===============================================')
