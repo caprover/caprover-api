@@ -34,7 +34,3 @@ Promise.resolve()
     .catch((error) => {
         console.log(error)
     })
-
-// TODO: a good example of how to export with typescript type information
-// https://github.com/dgreif/ring/blob/main/packages/ring-client-api/package.json
-//
