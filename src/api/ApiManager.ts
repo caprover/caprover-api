@@ -43,13 +43,18 @@ export default class ApiManager {
 
     constructor(
         baseDomain: string,
-        private authCallback: AuthRequiredCallback
+        private authCallback: AuthRequiredCallback,
+        private authToken?: string
     ) {
         const self = this
         const URL = baseDomain + '/api/v2'
-        this.http = new HttpClient(URL, function () {
-            return self.getAuthToken()
-        })
+        this.http = new HttpClient(
+            URL,
+            function () {
+                return self.getAuthToken()
+            },
+            authToken
+        )
     }
 
     destroy() {

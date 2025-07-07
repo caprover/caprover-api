@@ -9,13 +9,15 @@ export default class HttpClient {
     public readonly GET = 'GET'
     public readonly POST = 'POST'
     public isDestroyed = false
-    private authToken: string = ''
 
     constructor(
         private baseUrl: string,
-        private onAuthFailure: () => Promise<string>
+        private onAuthFailure: () => Promise<string>,
+        private authToken?: string
     ) {
-        //
+        if (!authToken) {
+            this.authToken = ''
+        }
     }
 
     createHeaders() {
