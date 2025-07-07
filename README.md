@@ -4,6 +4,8 @@ https://github.com/caprover/caprover-api
 
 A simple, typed Typescript SDK for the CapRover API.
 
+EXPERIMENTAL - backward compatibility is not guaranteed.
+
 ## Install
 
 ```
