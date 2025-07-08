@@ -19,13 +19,12 @@ import CapRoverAPI, { CapRoverModels } from 'caprover-api'
 
 const caprover = new CapRoverAPI(
     'https://captain.server.demo.caprover.com',
-    () => {
-        // get password and otp from user
+    new SimpleAuthenticationProvider(() => {
         return Promise.resolve({
             password: 'captain42',
-            otpToken: undefined, // only if 2FA is enabled
+            otpToken: undefined,
         })
-    }
+    })
 )
 
 caprover

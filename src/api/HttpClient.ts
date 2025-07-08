@@ -1,5 +1,6 @@
 import axios from 'axios'
 import ErrorFactory from './ErrorFactory'
+import { AuthenticationProvider } from './ApiManager'
 
 let TOKEN_HEADER = 'x-captain-auth'
 let NAMESPACE = 'x-namespace'
@@ -12,25 +13,26 @@ export default class HttpClient {
 
     constructor(
         private baseUrl: string,
-        private onAuthFailure: () => Promise<string>,
-        private authToken?: string
+        private authTokenProvider: () => Promise<string>,
+        private onLoginRequested: () => Promise<void>
     ) {
-        if (!authToken) {
-            this.authToken = ''
-        }
+        //
     }
 
     createHeaders() {
         let headers: any = {}
-        if (this.authToken) headers[TOKEN_HEADER] = this.authToken
         headers[NAMESPACE] = CAPTAIN
 
         // check user/appData or apiManager.uploadAppData before changing this signature.
-        return headers
-    }
 
-    setAuthToken(authToken: string) {
-        this.authToken = authToken
+        return Promise.resolve() //
+            .then(() => {
+                return this.authTokenProvider()
+            })
+            .then((authToken) => {
+                if (authToken) headers[TOKEN_HEADER] = authToken
+                return headers
+            })
     }
 
     destroy() {
@@ -48,12 +50,12 @@ export default class HttpClient {
                     const data = axiosResponse.data // this is an axios thing!
 
                     if (
+                        // if we ever get STATUS_ERROR_NOT_AUTHORIZED when trying to log in, we will end up in an infinite loop!
                         data.status === ErrorFactory.STATUS_AUTH_TOKEN_INVALID
                     ) {
                         return self
-                            .onAuthFailure() //
-                            .then(function (authToken) {
-                                self.setAuthToken(authToken)
+                            .onLoginRequested() //
+                            .then(function () {
                                 return self
                                     .fetchInternal(method, endpoint, variables)
                                     .then(function (newAxiosResponse) {
@@ -61,18 +63,6 @@ export default class HttpClient {
                                     })
                             })
                             .catch(function (error) {
-                                // Upon wrong password or back-off error, we force logout the user
-                                // to avoid getting stuck with wrong password loop
-                                if (
-                                    error.captainStatus + '' ===
-                                        ErrorFactory.STATUS_PASSWORD_BACK_OFF +
-                                            '' ||
-                                    error.captainStatus + '' ===
-                                        ErrorFactory.STATUS_WRONG_PASSWORD + ''
-                                ) {
-                                    self.setAuthToken('')
-                                }
-
                                 return Promise.reject(error)
                             })
                     } else {
@@ -120,11 +110,16 @@ export default class HttpClient {
 
     getReq(endpoint: string, variables: any) {
         const self = this
-        return axios
-            .get(this.baseUrl + endpoint, {
-                params: variables,
-                headers: self.createHeaders(),
-            }) //
+        return Promise.resolve() //
+            .then(function () {
+                return self.createHeaders()
+            })
+            .then(function (headers) {
+                return axios.get(self.baseUrl + endpoint, {
+                    params: variables,
+                    headers: headers,
+                })
+            })
             .then(function (data) {
                 // console.log(data);
                 return data
@@ -133,9 +128,14 @@ export default class HttpClient {
 
     postReq(endpoint: string, variables: any) {
         const self = this
-        return axios
-            .post(this.baseUrl + endpoint, variables, {
-                headers: self.createHeaders(),
+        return Promise.resolve() //
+            .then(function () {
+                return self.createHeaders()
+            })
+            .then(function (headers) {
+                return axios.post(self.baseUrl + endpoint, variables, {
+                    headers: headers,
+                }) //
             }) //
             .then(function (data) {
                 // console.log(data);

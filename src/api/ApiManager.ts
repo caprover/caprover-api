@@ -36,24 +36,58 @@ export type AuthenticationContent = {
     otpToken?: string
 }
 
-export type AuthRequiredCallback = () => Promise<AuthenticationContent>
+export interface AuthenticationProvider {
+    onAuthTokenRequested(): Promise<string>
+    onCredentialsRequested(): Promise<AuthenticationContent>
+    onAuthTokenUpdated(authToken: string): void
+}
+
+export class SimpleAuthenticationProvider implements AuthenticationProvider {
+    private authToken: string = ''
+
+    constructor(
+        private onCredRequestedImpl: () => Promise<AuthenticationContent>
+    ) {}
+
+    onAuthTokenRequested(): Promise<string> {
+        return Promise.resolve(this.authToken)
+    }
+
+    onCredentialsRequested(): Promise<AuthenticationContent> {
+        return this.onCredRequestedImpl()
+    }
+
+    onAuthTokenUpdated(newAuthToken: string) {
+        this.authToken = newAuthToken
+    }
+}
 
 export default class ApiManager {
     private http: HttpClient
 
-    constructor(
-        baseDomain: string,
-        private authCallback: AuthRequiredCallback,
-        private authToken?: string
-    ) {
+    constructor(baseDomain: string, authProvider: AuthenticationProvider) {
         const self = this
         const URL = baseDomain + '/api/v2'
         this.http = new HttpClient(
             URL,
-            function () {
-                return self.getAuthToken()
+            () => {
+                return authProvider.onAuthTokenRequested()
             },
-            authToken
+            () => {
+                return Promise.resolve() //
+                    .then(() => {
+                        return authProvider.onCredentialsRequested()
+                    })
+                    .then((authContent) => {
+                        return self.login(
+                            authContent.password,
+                            authContent.otpToken
+                        )
+                    }) //
+                    .then((authToken) => {
+                        authProvider.onAuthTokenUpdated(authToken)
+                    })
+            }
         )
     }
 
@@ -61,20 +95,17 @@ export default class ApiManager {
         this.http.destroy()
     }
 
-    getAuthToken(): Promise<string> {
+    login(password: string, otpToken?: string): Promise<string> {
         const self = this
         const http = self.http
 
         return Promise.resolve() //
-            .then(() => {
-                return self.authCallback()
-            })
             .then((authContent) => {
                 return Promise.resolve() //
                     .then(
                         http.fetch(http.POST, '/login', {
-                            password: authContent?.password,
-                            otpToken: authContent?.otpToken,
+                            password: password,
+                            otpToken: otpToken,
                         })
                     )
             })
