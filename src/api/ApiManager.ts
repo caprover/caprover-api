@@ -65,7 +65,10 @@ export class SimpleAuthenticationProvider implements AuthenticationProvider {
 export default class ApiManager {
     private http: HttpClient
 
-    constructor(baseDomain: string, authProvider: AuthenticationProvider) {
+    constructor(
+        baseDomain: string,
+        private authProvider: AuthenticationProvider
+    ) {
         const self = this
         const URL = baseDomain + '/api/v2'
         this.http = new HttpClient(
@@ -83,9 +86,6 @@ export default class ApiManager {
                             authContent.password,
                             authContent.otpToken
                         )
-                    }) //
-                    .then((authToken) => {
-                        authProvider.onAuthTokenUpdated(authToken)
                     })
             }
         )
@@ -95,7 +95,7 @@ export default class ApiManager {
         this.http.destroy()
     }
 
-    login(password: string, otpToken?: string): Promise<string> {
+    login(password: string, otpToken?: string): Promise<void> {
         const self = this
         const http = self.http
 
@@ -111,6 +111,9 @@ export default class ApiManager {
             })
             .then(function (data) {
                 return data.token
+            })
+            .then((authToken) => {
+                self.authProvider.onAuthTokenUpdated(authToken)
             })
     }
 
