@@ -61,7 +61,7 @@ export interface IAppTag {
 
 export interface IAppDefinitionBase {
     projectId?: string | undefined
-    description: string
+    description?: string
     deployedVersion: number
     notExposeAsWebApp: boolean
     hasPersistentData: boolean

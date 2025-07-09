@@ -1,6 +1,6 @@
 export default interface GoAccessReportResponse {
     domainName: string
     name: string
-    lastModifiedTime: Date
+    lastModifiedTime: string
     url: string
 }
