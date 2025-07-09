@@ -1,3 +1,3 @@
 export default interface UnusedImagesResponse {
-    images: { id: string; tags: string[] }[]
+    unusedImages: { id: string; tags: string[] }[]
 }
