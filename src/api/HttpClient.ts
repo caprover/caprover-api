@@ -1,10 +1,70 @@
-import axios from 'axios'
 import ErrorFactory from './ErrorFactory'
-import { AuthenticationProvider } from './ApiManager'
+import fetch from 'cross-fetch'
 
+function buildQueryParams(params: Record<string, any>): string {
+    if (!params || Object.keys(params).length === 0) return ''
+    return (
+        '?' +
+        Object.entries(params)
+            .map(
+                ([key, value]) =>
+                    encodeURIComponent(key) + '=' + encodeURIComponent(value)
+            )
+            .join('&')
+    )
+}
 let TOKEN_HEADER = 'x-captain-auth'
 let NAMESPACE = 'x-namespace'
 let CAPTAIN = 'captain'
+
+class CrossFetchEngine {
+    public static async post(
+        url: string,
+        variables: Record<string, any>,
+        headers: Record<string, string>
+    ): Promise<any> {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...headers,
+            },
+            body: JSON.stringify(variables),
+        })
+
+        if (!res.ok) {
+            const errBody = await res.text()
+            throw new Error(`HTTP ${res.status}: ${errBody}`)
+        }
+        return res.json()
+    }
+
+    public static async get(
+        url: string,
+        params: Record<string, any>,
+        headers: Record<string, string>
+    ): Promise<any> {
+        const fullUrl =
+            url +
+            (params && Object.keys(params).length > 0
+                ? buildQueryParams(params)
+                : '')
+
+        const res = await fetch(fullUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...headers,
+            },
+        })
+
+        if (!res.ok) {
+            const errBody = await res.text()
+            throw new Error(`HTTP ${res.status}: ${errBody}`)
+        }
+        return res.json()
+    }
+}
 
 export default class HttpClient {
     public readonly GET = 'GET'
@@ -46,27 +106,26 @@ export default class HttpClient {
                 .then(function () {
                     return self.fetchInternal(method, endpoint, variables) //
                 })
-                .then(function (axiosResponse) {
-                    const data = axiosResponse.data // this is an axios thing!
-
+                .then(function (fetchResponse) {
                     if (
                         // if we ever get STATUS_ERROR_NOT_AUTHORIZED when trying to log in, we will end up in an infinite loop!
-                        data.status === ErrorFactory.STATUS_AUTH_TOKEN_INVALID
+                        fetchResponse.status ===
+                        ErrorFactory.STATUS_AUTH_TOKEN_INVALID
                     ) {
                         return self
                             .onLoginRequested() //
                             .then(function () {
                                 return self
                                     .fetchInternal(method, endpoint, variables)
-                                    .then(function (newAxiosResponse) {
-                                        return newAxiosResponse.data
+                                    .then(function (httpResponse) {
+                                        return httpResponse
                                     })
                             })
                             .catch(function (error) {
                                 return Promise.reject(error)
                             })
                     } else {
-                        return data
+                        return fetchResponse
                     }
                 })
                 .then(function (data) {
@@ -115,10 +174,11 @@ export default class HttpClient {
                 return self.createHeaders()
             })
             .then(function (headers) {
-                return axios.get(self.baseUrl + endpoint, {
-                    params: variables,
-                    headers: headers,
-                })
+                return CrossFetchEngine.get(
+                    self.baseUrl + endpoint,
+                    variables,
+                    headers
+                )
             })
             .then(function (data) {
                 // console.log(data);
@@ -133,10 +193,12 @@ export default class HttpClient {
                 return self.createHeaders()
             })
             .then(function (headers) {
-                return axios.post(self.baseUrl + endpoint, variables, {
-                    headers: headers,
-                }) //
-            }) //
+                return CrossFetchEngine.post(
+                    self.baseUrl + endpoint,
+                    variables,
+                    headers
+                )
+            })
             .then(function (data) {
                 // console.log(data);
                 return data
