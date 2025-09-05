@@ -32,6 +32,13 @@ Promise.resolve()
             '=============================================== getDockerRegistries:'
         )
         console.log(response)
+        return caprover.executeGenericApiCommand('GET', '/user/registries', {})
+    })
+    .then((response) => {
+        console.log(
+            '=============================================== getDockerRegistries:'
+        )
+        console.log(response)
     })
     .catch((error) => {
         console.log(error)

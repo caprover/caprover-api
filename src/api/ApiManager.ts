@@ -861,4 +861,15 @@ export default class ApiManager {
                 })
             )
     }
+
+    executeGenericApiCommand(
+        verb: 'GET' | 'POST',
+        endpoint: string,
+        data: any
+    ): Promise<any> {
+        const http = this.http
+
+        return Promise.resolve() //
+            .then(http.fetch(verb, endpoint, data))
+    }
 }
