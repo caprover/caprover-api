@@ -22,6 +22,7 @@ import LogsResponse from '../models/LogsResponse'
 import { NetDataInfo } from '../models/NetDataInfo'
 import NginxConfig from '../models/NginxConfig'
 import OneClickAppDefinitionResponse from '../models/OneClickAppDefinitionResponse'
+import OneClickAppDeploymentState from '../models/OneClickAppDeploymentState'
 import OneClickAppRepositories from '../models/OneClickAppRepositories'
 import OneClickAppResponse from '../models/OneClickAppResponse'
 import { ProjectDefinition } from '../models/ProjectDefinition'
@@ -858,6 +859,34 @@ export default class ApiManager {
                     sshPort,
                     sshUser,
                     captainIpAddress,
+                })
+            )
+    }
+
+    startOneClickAppDeploy(
+        template: any,
+        values?: any
+    ): Promise<{ jobId: string }> {
+        const http = this.http
+
+        return Promise.resolve() //
+            .then(
+                http.fetch(http.POST, '/user/oneclick/deploy', {
+                    template,
+                    values,
+                })
+            )
+    }
+
+    getOneClickAppDeployProgress(
+        jobId: string
+    ): Promise<OneClickAppDeploymentState> {
+        const http = this.http
+
+        return Promise.resolve() //
+            .then(
+                http.fetch(http.GET, '/user/oneclick/deploy/progress', {
+                    jobId,
                 })
             )
     }
