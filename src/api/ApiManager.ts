@@ -865,7 +865,8 @@ export default class ApiManager {
 
     startOneClickAppDeploy(
         template: any,
-        values?: any
+        values?: any,
+        templateName?: string
     ): Promise<{ jobId: string }> {
         const http = this.http
 
@@ -874,6 +875,7 @@ export default class ApiManager {
                 http.fetch(http.POST, '/user/oneclick/deploy', {
                     template,
                     values,
+                    templateName,
                 })
             )
     }
