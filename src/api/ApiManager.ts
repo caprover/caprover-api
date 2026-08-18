@@ -291,7 +291,8 @@ export default class ApiManager {
                 http.fetch(
                     http.POST,
                     `/user/apps/appData/${appName}?detached=1`,
-                    formData
+                    formData,
+                    http.FORM_DATA
                 )
             )
     }
