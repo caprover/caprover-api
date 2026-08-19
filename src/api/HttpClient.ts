@@ -1,6 +1,31 @@
 import ErrorFactory from './ErrorFactory'
 import fetch from 'cross-fetch'
 
+export type RequestBodyType = 'json' | 'form-data'
+
+export function createPostRequestInit(
+    variables: any,
+    headers: Record<string, string>,
+    bodyType: RequestBodyType
+): RequestInit {
+    if (bodyType === 'form-data') {
+        return {
+            method: 'POST',
+            headers,
+            body: variables,
+        }
+    }
+
+    return {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            ...headers,
+        },
+        body: JSON.stringify(variables),
+    }
+}
+
 function buildQueryParams(params: Record<string, any>): string {
     if (!params || Object.keys(params).length === 0) return ''
     return (
@@ -20,17 +45,14 @@ let CAPTAIN = 'captain'
 class CrossFetchEngine {
     public static async post(
         url: string,
-        variables: Record<string, any>,
-        headers: Record<string, string>
+        variables: any,
+        headers: Record<string, string>,
+        bodyType: RequestBodyType
     ): Promise<any> {
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...headers,
-            },
-            body: JSON.stringify(variables),
-        })
+        const res = await fetch(
+            url,
+            createPostRequestInit(variables, headers, bodyType)
+        )
 
         if (!res.ok) {
             const errBody = await res.text()
@@ -69,6 +91,7 @@ class CrossFetchEngine {
 export default class HttpClient {
     public readonly GET = 'GET'
     public readonly POST = 'POST'
+    public readonly FORM_DATA = 'form-data'
     public isDestroyed = false
 
     constructor(
@@ -99,12 +122,22 @@ export default class HttpClient {
         this.isDestroyed = true
     }
 
-    fetch(method: 'GET' | 'POST', endpoint: string, variables: any) {
+    fetch(
+        method: 'GET' | 'POST',
+        endpoint: string,
+        variables: any,
+        bodyType: RequestBodyType = 'json'
+    ) {
         const self = this
         return function (): Promise<any> {
             return Promise.resolve() //
                 .then(function () {
-                    return self.fetchInternal(method, endpoint, variables) //
+                    return self.fetchInternal(
+                        method,
+                        endpoint,
+                        variables,
+                        bodyType
+                    ) //
                 })
                 .then(function (fetchResponse) {
                     if (
@@ -116,7 +149,12 @@ export default class HttpClient {
                             .onLoginRequested() //
                             .then(function () {
                                 return self
-                                    .fetchInternal(method, endpoint, variables)
+                                    .fetchInternal(
+                                        method,
+                                        endpoint,
+                                        variables,
+                                        bodyType
+                                    )
                                     .then(function (httpResponse) {
                                         return httpResponse
                                     })
@@ -159,10 +197,16 @@ export default class HttpClient {
         }
     }
 
-    fetchInternal(method: 'GET' | 'POST', endpoint: string, variables: any) {
+    fetchInternal(
+        method: 'GET' | 'POST',
+        endpoint: string,
+        variables: any,
+        bodyType: RequestBodyType = 'json'
+    ) {
         if (method === this.GET) return this.getReq(endpoint, variables)
 
-        if (method === this.POST) return this.postReq(endpoint, variables)
+        if (method === this.POST)
+            return this.postReq(endpoint, variables, bodyType)
 
         throw new Error(`Unknown method: ${method}`)
     }
@@ -186,7 +230,11 @@ export default class HttpClient {
             })
     }
 
-    postReq(endpoint: string, variables: any) {
+    postReq(
+        endpoint: string,
+        variables: any,
+        bodyType: RequestBodyType = 'json'
+    ) {
         const self = this
         return Promise.resolve() //
             .then(function () {
@@ -196,7 +244,8 @@ export default class HttpClient {
                 return CrossFetchEngine.post(
                     self.baseUrl + endpoint,
                     variables,
-                    headers
+                    headers,
+                    bodyType
                 )
             })
             .then(function (data) {

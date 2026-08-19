@@ -1,6 +1,6 @@
 {
     "name": "caprover-api",
-    "version": "0.0.19",
+    "version": "0.0.20",
     "description": "API client for CapRover",
     "types": "dist/index.d.ts",
     "main": "dist/index.js",
@@ -9,7 +9,7 @@
         "formatter-write": "prettier --write './src/**/*.ts*'",
         "tslint": "tslint -c tslint.json -p tsconfig.json",
         "tslint-fix": "tslint --fix -c tslint.json -p tsconfig.json",
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "npm run build && node --test test/*.test.js",
         "build": "rm -rf ./dist && npm run tslint && npx tsc && chmod +x ./dist -R",
         "dev": "rm -rf ./dist && npx tsc && node ./dist/example.js",
         "generate-barrels": "rm ./src/models/index.ts && barrelsby --directory src/models"
