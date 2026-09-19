@@ -5,6 +5,7 @@ const ErrorFactory = require('../dist/api/ErrorFactory').default
 const HttpClientModule = require('../dist/api/HttpClient')
 const HttpClient = HttpClientModule.default
 const { createPostRequestInit } = HttpClientModule
+const { createPatchRequestInit } = HttpClientModule
 
 test('JSON requests preserve the existing serialization and content type', () => {
     const payload = { appName: 'test-app' }
@@ -29,6 +30,20 @@ test('form data is passed through without setting a content type', () => {
     assert.strictEqual(request.body, formData)
     assert.deepEqual(request.headers, headers)
     assert.equal(Object.hasOwn(request.headers, 'Content-Type'), false)
+})
+
+test('PATCH requests use JSON serialization and content type', () => {
+    const payload = { appName: 'test-app', instanceCount: 2 }
+    const request = createPatchRequestInit(payload, {
+        'x-captain-auth': 'token',
+    })
+
+    assert.equal(request.method, 'PATCH')
+    assert.deepEqual(request.headers, {
+        'Content-Type': 'application/json',
+        'x-captain-auth': 'token',
+    })
+    assert.equal(request.body, JSON.stringify(payload))
 })
 
 test('authentication retry preserves the form-data body type', async () => {
