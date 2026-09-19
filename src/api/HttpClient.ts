@@ -64,10 +64,17 @@ class CrossFetchEngine {
         headers: Record<string, string>,
         bodyType: RequestBodyType
     ): Promise<any> {
-        const res = await fetch(
-            url,
-            createPostRequestInit(variables, headers, bodyType)
-        )
+        const request = createPostRequestInit(variables, headers, bodyType)
+        // node-fetch v2 (used by cross-fetch) stringifies native FormData.
+        // Keep native FormData paired with the runtime's native fetch encoder.
+        const isNativeFormData =
+            bodyType === 'form-data' &&
+            typeof globalThis.FormData !== 'undefined' &&
+            variables instanceof globalThis.FormData &&
+            typeof globalThis.fetch === 'function'
+        const res = isNativeFormData
+            ? await globalThis.fetch(url, request)
+            : await fetch(url, request)
 
         if (!res.ok) {
             const errBody = await res.text()
