@@ -1,4 +1,4 @@
-import { IAppDef } from '../models/AppDefinition'
+import { IAppDef, IAppDefinitionPatch } from '../models/AppDefinition'
 import AppDefinitionsResponse from '../models/AppDefinitionsResponse'
 import AppDeleteResponse from '../models/AppDeleteResponse'
 import { IAutomatedCleanupConfigs } from '../models/AutomatedCleanupConfigs'
@@ -270,19 +270,28 @@ export default class ApiManager {
     }
 
     fetchAppLogsInHex(appName: string): Promise<LogsResponse> {
+        return this.fetchAppLogs(appName, 'hex')
+    }
+
+    fetchAppLogs(
+        appName: string,
+        encoding: string = 'ascii'
+    ): Promise<LogsResponse> {
         const http = this.http
 
         return Promise.resolve() //
             .then(
-                http.fetch(
-                    http.GET,
-                    `/user/apps/appData/${appName}/logs?encoding=hex`,
-                    {}
-                )
+                http.fetch(http.GET, `/user/apps/appData/${appName}/logs`, {
+                    encoding,
+                })
             )
     }
 
-    uploadAppData(appName: string, file: File): Promise<void> {
+    uploadAppData(
+        appName: string,
+        file: File,
+        detached: boolean = true
+    ): Promise<void> {
         const http = this.http
         let formData = new FormData()
         formData.append('sourceFile', file)
@@ -290,7 +299,9 @@ export default class ApiManager {
             .then(
                 http.fetch(
                     http.POST,
-                    `/user/apps/appData/${appName}?detached=1`,
+                    `/user/apps/appData/${appName}${
+                        detached ? '?detached=1' : ''
+                    }`,
                     formData,
                     http.FORM_DATA
                 )
@@ -395,6 +406,21 @@ export default class ApiManager {
                     tags: tags,
                     redirectDomain: redirectDomain,
                     projectId: projectId,
+                })
+            )
+    }
+
+    patchAppDefinition(
+        appName: string,
+        patch: IAppDefinitionPatch
+    ): Promise<void> {
+        const http = this.http
+
+        return Promise.resolve() //
+            .then(
+                http.fetch(http.PATCH, '/user/apps/appDefinitions/update', {
+                    ...patch,
+                    appName,
                 })
             )
     }
@@ -895,7 +921,7 @@ export default class ApiManager {
     }
 
     executeGenericApiCommand(
-        verb: 'GET' | 'POST',
+        verb: 'GET' | 'POST' | 'PATCH',
         endpoint: string,
         data: any
     ): Promise<any> {
