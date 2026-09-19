@@ -2,6 +2,7 @@ import ErrorFactory from './ErrorFactory'
 import fetch from 'cross-fetch'
 
 export type RequestBodyType = 'json' | 'form-data'
+export type HttpMethod = 'GET' | 'POST' | 'PATCH'
 
 export function createPostRequestInit(
     variables: any,
@@ -18,6 +19,20 @@ export function createPostRequestInit(
 
     return {
         method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            ...headers,
+        },
+        body: JSON.stringify(variables),
+    }
+}
+
+export function createPatchRequestInit(
+    variables: any,
+    headers: Record<string, string>
+): RequestInit {
+    return {
+        method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
             ...headers,
@@ -86,11 +101,26 @@ class CrossFetchEngine {
         }
         return res.json()
     }
+
+    public static async patch(
+        url: string,
+        variables: any,
+        headers: Record<string, string>
+    ): Promise<any> {
+        const res = await fetch(url, createPatchRequestInit(variables, headers))
+
+        if (!res.ok) {
+            const errBody = await res.text()
+            throw new Error(`HTTP ${res.status}: ${errBody}`)
+        }
+        return res.json()
+    }
 }
 
 export default class HttpClient {
     public readonly GET = 'GET'
     public readonly POST = 'POST'
+    public readonly PATCH = 'PATCH'
     public readonly FORM_DATA = 'form-data'
     public isDestroyed = false
 
@@ -123,7 +153,7 @@ export default class HttpClient {
     }
 
     fetch(
-        method: 'GET' | 'POST',
+        method: HttpMethod,
         endpoint: string,
         variables: any,
         bodyType: RequestBodyType = 'json'
@@ -198,7 +228,7 @@ export default class HttpClient {
     }
 
     fetchInternal(
-        method: 'GET' | 'POST',
+        method: HttpMethod,
         endpoint: string,
         variables: any,
         bodyType: RequestBodyType = 'json'
@@ -207,6 +237,8 @@ export default class HttpClient {
 
         if (method === this.POST)
             return this.postReq(endpoint, variables, bodyType)
+
+        if (method === this.PATCH) return this.patchReq(endpoint, variables)
 
         throw new Error(`Unknown method: ${method}`)
     }
@@ -250,6 +282,24 @@ export default class HttpClient {
             })
             .then(function (data) {
                 // console.log(data);
+                return data
+            })
+    }
+
+    patchReq(endpoint: string, variables: any) {
+        const self = this
+        return Promise.resolve() //
+            .then(function () {
+                return self.createHeaders()
+            })
+            .then(function (headers) {
+                return CrossFetchEngine.patch(
+                    self.baseUrl + endpoint,
+                    variables,
+                    headers
+                )
+            })
+            .then(function (data) {
                 return data
             })
     }

@@ -84,6 +84,10 @@ export interface IAppDefinitionBase {
     envVars: IAppEnvVar[]
     versions: IAppVersion[]
     appDeployTokenConfig?: AppDeployTokenConfig
+
+    // True for apps created before v1.15.0
+    // non-existent for apps created on or after v1.15.0
+    isLegacyAppName?: boolean
 }
 
 export interface IHttpAuth {
@@ -95,6 +99,33 @@ export interface IHttpAuth {
 export interface AppDeployTokenConfig {
     enabled: boolean
     appDeployToken?: string
+}
+
+export type IAppDefinitionPatch = Partial<
+    Pick<
+        IAppDefinitionBase,
+        | 'projectId'
+        | 'description'
+        | 'instanceCount'
+        | 'captainDefinitionRelativeFilePath'
+        | 'envVars'
+        | 'volumes'
+        | 'tags'
+        | 'nodeId'
+        | 'notExposeAsWebApp'
+        | 'containerHttpPort'
+        | 'forceSsl'
+        | 'ports'
+        | 'customNginxConfig'
+        | 'redirectDomain'
+        | 'preDeployFunction'
+        | 'serviceUpdateOverride'
+        | 'websocketSupport'
+        | 'appDeployTokenConfig'
+    >
+> & {
+    httpAuth?: IHttpAuth
+    appPushWebhook?: { repoInfo?: RepoInfo }
 }
 
 export interface IAppDef extends IAppDefinitionBase {
