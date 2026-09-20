@@ -136,6 +136,7 @@ test('repeated authorization failure is propagated after one retry', async () =>
 })
 
 test('ordinary server errors preserve status and message without retrying', async () => {
+    let requests = 0
     const client = new HttpClient(
         'https://captain.example.com',
         async () => 'valid',
@@ -143,10 +144,13 @@ test('ordinary server errors preserve status and message without retrying', asyn
             assert.fail('unexpected login')
         }
     )
-    client.fetchInternal = async () => ({
-        status: ErrorFactory.ILLEGAL_PARAMETER,
-        description: 'invalid input',
-    })
+    client.fetchInternal = async () => {
+        requests++
+        return {
+            status: ErrorFactory.ILLEGAL_PARAMETER,
+            description: 'invalid input',
+        }
+    }
     await assert.rejects(
         client.fetch(client.POST, '/user/apps', {})(),
         (error) => {
@@ -155,4 +159,5 @@ test('ordinary server errors preserve status and message without retrying', asyn
             return true
         }
     )
+    assert.equal(requests, 1)
 })
