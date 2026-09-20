@@ -74,3 +74,90 @@ test('authentication retry preserves the form-data body type', async () => {
     assert.equal(loginRequests, 1)
     assert.deepEqual(bodyTypes, ['form-data', 'form-data'])
 })
+
+for (const cachedToken of ['', 'stale-token']) {
+    test(`automatic login retries once with cached token ${JSON.stringify(cachedToken)}`, async () => {
+        let token = cachedToken
+        let logins = 0
+        const seen = []
+        const client = new HttpClient(
+            'https://captain.example.com',
+            async () => token,
+            async () => {
+                logins++
+                token = 'fresh-token'
+            }
+        )
+        client.fetchInternal = async () => {
+            const headers = await client.createHeaders()
+            seen.push(headers['x-captain-auth'])
+            return seen.length === 1
+                ? { status: ErrorFactory.STATUS_AUTH_TOKEN_INVALID }
+                : { status: ErrorFactory.OKAY, data: { success: true } }
+        }
+        assert.deepEqual(await client.fetch(client.GET, '/user/apps', {})(), {
+            success: true,
+        })
+        assert.equal(logins, 1)
+        assert.deepEqual(seen, [cachedToken || undefined, 'fresh-token'])
+    })
+}
+
+test('repeated authorization failure is propagated after one retry', async () => {
+    let requests = 0
+    let logins = 0
+    const client = new HttpClient(
+        'https://captain.example.com',
+        async () => '',
+        async () => {
+            logins++
+        }
+    )
+    client.fetchInternal = async () => {
+        requests++
+        return {
+            status: ErrorFactory.STATUS_AUTH_TOKEN_INVALID,
+            description: 'still invalid',
+        }
+    }
+    await assert.rejects(
+        client.fetch(client.GET, '/user/apps', {})(),
+        (error) => {
+            assert.equal(
+                error.captainStatus,
+                ErrorFactory.STATUS_AUTH_TOKEN_INVALID
+            )
+            assert.equal(error.captainMessage, 'still invalid')
+            return true
+        }
+    )
+    assert.equal(requests, 2)
+    assert.equal(logins, 1)
+})
+
+test('ordinary server errors preserve status and message without retrying', async () => {
+    let requests = 0
+    const client = new HttpClient(
+        'https://captain.example.com',
+        async () => 'valid',
+        async () => {
+            assert.fail('unexpected login')
+        }
+    )
+    client.fetchInternal = async () => {
+        requests++
+        return {
+            status: ErrorFactory.ILLEGAL_PARAMETER,
+            description: 'invalid input',
+        }
+    }
+    await assert.rejects(
+        client.fetch(client.POST, '/user/apps', {})(),
+        (error) => {
+            assert.equal(error.captainStatus, ErrorFactory.ILLEGAL_PARAMETER)
+            assert.equal(error.captainMessage, 'invalid input')
+            return true
+        }
+    )
+    assert.equal(requests, 1)
+})
