@@ -101,3 +101,48 @@ test('executeGenericApiCommand accepts PATCH', async () => {
 
     assert.equal(requests[0].method, 'PATCH')
 })
+
+test('saveTheme sends supplied writable theme fields', async () => {
+    const { api, requests } = createApiWithRequestRecorder()
+
+    await api.saveTheme('old-theme', {
+        name: 'new-theme',
+        content: 'theme-content',
+        extra: '{"siderTheme":"dark"}',
+        headEmbed: '<meta name="theme-marker" content="test">',
+        builtIn: true,
+    })
+
+    assert.deepEqual(requests, [
+        {
+            method: 'POST',
+            endpoint: '/user/system/themes/update',
+            data: {
+                oldName: 'old-theme',
+                name: 'new-theme',
+                content: 'theme-content',
+                extra: '{"siderTheme":"dark"}',
+                headEmbed: '<meta name="theme-marker" content="test">',
+            },
+            bodyType: 'json',
+        },
+    ])
+})
+
+test('saveTheme omits unspecified optional theme fields', async () => {
+    const { api, requests } = createApiWithRequestRecorder()
+
+    await api.saveTheme('old-theme', {
+        name: 'new-theme',
+        content: 'theme-content',
+    })
+
+    assert.deepEqual(requests[0].data, {
+        oldName: 'old-theme',
+        name: 'new-theme',
+        content: 'theme-content',
+    })
+    assert.equal('extra' in requests[0].data, false)
+    assert.equal('headEmbed' in requests[0].data, false)
+    assert.equal(JSON.stringify(requests[0].data).includes('undefined'), false)
+})
