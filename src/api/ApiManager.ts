@@ -145,15 +145,28 @@ export default class ApiManager {
 
     saveTheme(oldName: string, theme: CapRoverTheme): Promise<{}> {
         const http = this.http
+        const payload: {
+            oldName: string
+            name: string
+            content: string
+            extra?: string
+            headEmbed?: string
+        } = {
+            oldName,
+            name: theme.name,
+            content: theme.content,
+        }
+
+        if (theme.extra !== undefined) {
+            payload.extra = theme.extra
+        }
+
+        if (theme.headEmbed !== undefined) {
+            payload.headEmbed = theme.headEmbed
+        }
 
         return Promise.resolve() //
-            .then(
-                http.fetch(http.POST, '/user/system/themes/update', {
-                    oldName,
-                    name: theme.name,
-                    content: theme.content,
-                })
-            )
+            .then(http.fetch(http.POST, '/user/system/themes/update', payload))
     }
 
     deleteTheme(themeName: string): Promise<{}> {
