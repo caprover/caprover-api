@@ -182,3 +182,19 @@ test('getOneClickAppByName returns the parsed template object', async () => {
     })
     assert.strictEqual(response.appTemplate, appTemplate)
 })
+
+test('getDockerRegistries exposes the backend default push registry ID', async () => {
+    const registries = [{ id: 'registry-1', registryDomain: 'ghcr.io' }]
+    const data = { registries, defaultPushRegistryId: 'registry-1' }
+    const { api, requests } = createApiWithRequestRecorder(data)
+
+    const response = await api.getDockerRegistries()
+
+    assert.deepEqual(requests, [{
+        method: 'GET',
+        endpoint: '/user/registries',
+        data: {},
+        bodyType: 'json',
+    }])
+    assert.strictEqual(response, data)
+})
