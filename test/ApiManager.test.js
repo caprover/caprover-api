@@ -147,7 +147,6 @@ test('saveTheme omits unspecified optional theme fields', async () => {
     assert.equal(JSON.stringify(requests[0].data).includes('undefined'), false)
 })
 
-
 test('getOneClickAppByName returns the parsed template object', async () => {
     const appTemplate = {
         services: {
