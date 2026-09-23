@@ -28,6 +28,24 @@ function createApiWithRequestRecorder(response = {}) {
     return { api, requests }
 }
 
+test('getDockerRegistries preserves the backend default push registry field', async () => {
+    const response = {
+        registries: [{ id: 'registry-1', registryDomain: 'ghcr.io' }],
+        defaultPushRegistryId: 'registry-1',
+    }
+    const { api, requests } = createApiWithRequestRecorder(response)
+
+    assert.deepEqual(await api.getDockerRegistries(), response)
+    assert.deepEqual(requests, [
+        {
+            method: 'GET',
+            endpoint: '/user/registries',
+            data: {},
+            bodyType: 'json',
+        },
+    ])
+})
+
 test('patchAppDefinition uses the partial update endpoint', async () => {
     const { api, requests } = createApiWithRequestRecorder()
 
