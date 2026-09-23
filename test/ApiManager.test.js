@@ -5,7 +5,7 @@ const ApiManagerModule = require('../dist/api/ApiManager')
 const ApiManager = ApiManagerModule.default
 const { SimpleAuthenticationProvider } = ApiManagerModule
 
-function createApiWithRequestRecorder() {
+function createApiWithRequestRecorder(response = {}) {
     const api = new ApiManager(
         'https://captain.example.com',
         new SimpleAuthenticationProvider(() =>
@@ -21,7 +21,7 @@ function createApiWithRequestRecorder() {
         FORM_DATA: 'form-data',
         fetch(method, endpoint, data, bodyType = 'json') {
             requests.push({ method, endpoint, data, bodyType })
-            return () => Promise.resolve({})
+            return () => Promise.resolve(response)
         },
     }
 
@@ -145,4 +145,40 @@ test('saveTheme omits unspecified optional theme fields', async () => {
     assert.equal('extra' in requests[0].data, false)
     assert.equal('headEmbed' in requests[0].data, false)
     assert.equal(JSON.stringify(requests[0].data).includes('undefined'), false)
+})
+
+test('getOneClickAppByName returns the parsed template object', async () => {
+    const appTemplate = {
+        services: {
+            'srv-captain--demo': {
+                image: 'nginx:alpine',
+            },
+        },
+        captainVersion: 4,
+        caproverOneClickApp: {
+            instructions: {
+                start: 'Start instructions',
+                end: 'End instructions',
+            },
+            displayName: 'Demo',
+            variables: [],
+        },
+    }
+    const { api, requests } = createApiWithRequestRecorder({ appTemplate })
+
+    const response = await api.getOneClickAppByName(
+        'demo',
+        'https://repo.example.com'
+    )
+
+    assert.deepEqual(requests[0], {
+        method: 'GET',
+        endpoint: '/user/oneclick/template/app',
+        data: {
+            appName: 'demo',
+            baseDomain: 'https://repo.example.com',
+        },
+        bodyType: 'json',
+    })
+    assert.strictEqual(response.appTemplate, appTemplate)
 })
