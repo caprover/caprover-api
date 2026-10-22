@@ -39,6 +39,12 @@ caprover
 
 ---
 
+`caprover.getDiskUsage()` returns a `CapRoverModels.DiskUsageResponse` with
+`coverage: 'captain-node'`, node ID/hostname, and total/used/available bytes plus
+`normal | warning | critical` severity for each disk. It covers the filesystem
+backing the Captain base directory. Requires the server endpoint added in
+[caprover/caprover#2520](https://github.com/caprover/caprover/pull/2520).
+
 ## **How to Run Locally**
 
 1. `npm install`

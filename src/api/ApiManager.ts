@@ -5,6 +5,7 @@ import { IAutomatedCleanupConfigs } from '../models/AutomatedCleanupConfigs'
 import { BuildLogsResponse } from '../models/BuildLogsResponse'
 import CapRoverTheme from '../models/CapRoverTheme'
 import CaptainInfo from '../models/CaptainInfo'
+import { DiskUsageResponse } from '../models/DiskUsage'
 import { GoAccessInfo } from '../models/GoAccessInfo'
 import GoAccessReportResponse from '../models/GoAccessReportResponse'
 import { ICaptainDefinition } from '../models/ICaptainDefinition'
@@ -712,6 +713,14 @@ export default class ApiManager {
                     }
                 )
             )
+    }
+
+    /** Returns filesystem capacity for the node hosting CapRover. */
+    getDiskUsage(): Promise<DiskUsageResponse> {
+        const http = this.http
+
+        return Promise.resolve() //
+            .then(http.fetch(http.GET, '/user/system/diskusage', {}))
     }
 
     getDiskCleanUpSettings(): Promise<IAutomatedCleanupConfigs> {
