@@ -1,6 +1,7 @@
 import { IAppDef, IAppDefinitionPatch } from '../models/AppDefinition'
 import AppDefinitionsResponse from '../models/AppDefinitionsResponse'
 import AppDeleteResponse from '../models/AppDeleteResponse'
+import { AppRuntimeDetails, AppsRuntimeResponse } from '../models/AppRuntime'
 import { IAutomatedCleanupConfigs } from '../models/AutomatedCleanupConfigs'
 import { BuildLogsResponse } from '../models/BuildLogsResponse'
 import CapRoverTheme from '../models/CapRoverTheme'
@@ -274,6 +275,26 @@ export default class ApiManager {
 
         return Promise.resolve() //
             .then(http.fetch(http.GET, '/user/projects', {}))
+    }
+
+    getAppsRuntime(): Promise<AppsRuntimeResponse> {
+        const http = this.http
+
+        return Promise.resolve() //
+            .then(http.fetch(http.GET, '/user/apps/runtime', {}))
+    }
+
+    getAppRuntime(appName: string): Promise<AppRuntimeDetails> {
+        const http = this.http
+
+        return Promise.resolve() //
+            .then(
+                http.fetch(
+                    http.GET,
+                    `/user/apps/runtime/${encodeURIComponent(appName)}`,
+                    {}
+                )
+            )
     }
 
     fetchBuildLogs(appName: string): Promise<BuildLogsResponse> {

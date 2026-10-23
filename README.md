@@ -45,6 +45,15 @@ caprover
 backing the Captain base directory. Requires the server endpoint added in
 [caprover/caprover#2520](https://github.com/caprover/caprover/pull/2520).
 
+`caprover.getAppsRuntime()` returns a `CapRoverModels.AppsRuntimeResponse`
+containing runtime status, desired/running instance counts, current tasks, and
+latest failure for each app. `caprover.getAppRuntime(appName)` returns
+`CapRoverModels.AppRuntimeDetails` with the same fields plus up to ten historical
+tasks, newest first. Unavailable runtime data has `status: 'unavailable'`,
+nullable counts, and an error message. These methods require the
+server endpoints added in
+[caprover/caprover#2522](https://github.com/caprover/caprover/pull/2522).
+
 ## **How to Run Locally**
 
 1. `npm install`
