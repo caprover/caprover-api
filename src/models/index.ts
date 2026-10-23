@@ -5,6 +5,7 @@
 export * from './AppDefinition'
 export * from './AppDefinitionsResponse'
 export * from './AppDeleteResponse'
+export * from './AppRuntime'
 export * from './AutomatedCleanupConfigs'
 export * from './BackupMeta'
 export * from './BuildLogsResponse'
